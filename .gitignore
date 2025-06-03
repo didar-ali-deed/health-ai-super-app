@@ -1,0 +1,20 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore environment
+myenv/
+.env
+
+# Ignore data/models unless you need them deployed
+data/
+*.db
+*.log
+
+# VS Code and system files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Ignore backups
+*backup*
