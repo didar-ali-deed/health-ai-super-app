@@ -6,10 +6,7 @@ An end-to-end **AI-powered health diagnostics system** built with Python and Str
 
 ## 🚀 Live Demo
 
-🔗 [Try the App on Streamlit](https://yourappname.streamlit.app)  
-_(Replace with your actual deployed Streamlit app link)_
-
----
+## 🔗 [Try the App on Streamlit](https://health-ai-super-app-deed.streamlit.app/)
 
 ## 🎯 Project Features
 
@@ -88,7 +85,7 @@ health-ai-super-app/
 ### ✅ 1. Clone the Repo
 
 ```bash
-git clone https://github.com/yourusername/health-ai-super-app.git
+git clone https://github.com/didar-ali-deed/health-ai-super-app.git
 cd health-ai-super-app
 ```
 
