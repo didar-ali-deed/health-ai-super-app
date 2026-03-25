@@ -34,7 +34,7 @@ Additional bugs:
 | `auth.py` | `render_login_form()`, `handle_logout()`, session state helpers, stable encryption key loading |
 | `dashboard.py` | `render_dashboard()` — prediction chart, health metrics summary, records table with search/filter/pagination, CSV download |
 | `profile.py` | `render_profile()` — theme toggle, 2FA setup + QR display + verify, account deletion |
-| `layout.py` (cleaned) | `apply_custom_css()`, `render_header()`, `render_footer()`, `render_services()` — no changes to logic, clean up dead nav href code |
+| `layout.py` (cleaned) | `apply_custom_css()`, `render_header()`, `render_footer()`, `render_services()` — no logic changes; visual updates to `render_services()` come from the new CSS tokens only; clean up dead nav href code |
 | `database.py` | Unchanged |
 | `diabetes_analysis/`, `speech_analysis/`, `xray_analysis/`, `models/` | Unchanged |
 
@@ -71,7 +71,7 @@ Additional bugs:
 
 **Hero section:** Light blue gradient background (`#EBF3FF → #f8faff`). Adds a small pill badge ("AI-POWERED DIAGNOSTICS") above the heading for visual hierarchy. CTA button becomes a pill with a blue drop shadow.
 
-**Stats bar:** A three-column row below the hero showing model accuracy figures (88%, 91%, 92%) — adds immediate credibility without requiring login.
+**Stats bar:** A three-column row below the hero showing model accuracy figures (88% diabetes, 91% Parkinson's, 92% pneumonia) — values sourced from the project README and match the trained model evaluation results. Adds immediate credibility without requiring login.
 
 **Service cards:** White cards with `#e0ecff` border and subtle blue-tinted shadows. Each card shows the model type and accuracy below the title. CTA buttons are blue pills ("Analyse →").
 
@@ -120,7 +120,7 @@ models/*.h5 filter=lfs diff=lfs merge=lfs -text
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 ```
 
-**`.streamlit/config.toml`** — kept as-is (CORS enabled, XSRF off, port 8501 is ignored by HF Spaces but harmless).
+**`.streamlit/config.toml`** — kept as-is (`enableCORS = true`, `enableXsrfProtection = false`, port 8501). These are dev/demo-friendly settings acceptable for a portfolio deployment. HF Spaces ignores the port setting and assigns its own.
 
 ### Deployment steps (after code changes are merged)
 
