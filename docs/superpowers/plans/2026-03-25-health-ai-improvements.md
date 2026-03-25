@@ -723,7 +723,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-from auth import display_notifications, init_session_state, render_login_form, render_logout_button
+from auth import display_notifications, init_session_state, push_notification, render_login_form, render_logout_button
 from dashboard import render_dashboard
 from layout import apply_custom_css, render_footer, render_header, render_services
 from profile import render_profile
@@ -753,7 +753,6 @@ if st.session_state.logged_in:
         st.session_state.username = ""
         st.session_state.user_id = None
         st.session_state.redirect_to = "app.py"
-        from auth import push_notification
         push_notification("warning", "Session timed out. Please log in again.")
         logging.info("Session timed out")
 
@@ -816,26 +815,20 @@ Full rewrite of `style.css` using the Clean Medical design tokens. All existing 
 **Files:**
 - Modify: `style.css` (full rewrite)
 
-- [ ] **Step 1: Verify how dark mode is toggled before writing the CSS**
+- [ ] **Step 1: Add `data-theme` injection to `apply_custom_css()` in `layout.py`**
 
-The new CSS uses `[data-theme="dark"]` selectors on `<body>`. Check whether `apply_custom_css()` in `layout.py` actually sets that attribute:
+The new CSS uses `[data-theme="dark"]` selectors on `<body>`. The current `apply_custom_css()` does not set this attribute, so dark mode CSS will have no effect without this fix. Apply it unconditionally — it is safe regardless of the current theme value.
 
-```bash
-grep -n "data-theme\|setAttribute\|theme" layout.py
-```
-
-If `apply_custom_css()` does **not** inject a `data-theme` attribute onto `<body>`, add the following injection at the end of `apply_custom_css()`, after the CSS `<style>` block is written:
+In `layout.py`, add the following two lines at the **end** of `apply_custom_css()`, after the `st.markdown(f"<style>{css}</style>", ...)` call:
 
 ```python
-    # Set data-theme attribute on <body> so CSS [data-theme="dark"] selectors work
+    # Inject data-theme onto <body> so [data-theme="dark"] CSS selectors activate
     theme_attr = theme if theme in ("light", "dark") else "light"
     st.markdown(
         f"<script>document.body.setAttribute('data-theme', '{theme_attr}');</script>",
         unsafe_allow_html=True,
     )
 ```
-
-This must be done **before** rewriting `style.css` — otherwise dark mode silently stops working after the CSS change.
 
 - [ ] **Step 2: Replace `style.css` entirely**
 
@@ -971,17 +964,18 @@ html, body {
 .dropdown:hover .dropdown-content,
 .dropdown:focus-within .dropdown-content { display: block; }
 
-.dropdown-content a {
+/* dropdown-item is a <span> (not <a>) — Streamlit nav links are decorative only */
+.dropdown-item {
   display: block;
   padding: 0.65rem 1rem;
   color: var(--text-dark);
-  text-decoration: none;
   font-size: 0.9rem;
   font-weight: 500;
+  cursor: default;
   transition: var(--transition);
 }
 
-.dropdown-content a:hover { background: var(--primary-light); color: var(--primary); }
+.dropdown-item:hover { background: var(--primary-light); color: var(--primary); }
 
 /* Hamburger */
 .hamburger {
@@ -1313,6 +1307,16 @@ pinned: false
 ---
 
 ```
+
+- [ ] **Step 1b: Confirm Git LFS is installed on your machine**
+
+```bash
+git lfs version
+```
+
+If the command is not found, install Git LFS first:
+- **Windows:** download from https://git-lfs.com or run `winget install GitHub.GitLFS`
+- Then run `git lfs install` once to initialise it for your user account
 
 - [ ] **Step 2: Create `.gitattributes` for Git LFS**
 
