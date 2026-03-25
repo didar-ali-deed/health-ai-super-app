@@ -18,3 +18,6 @@ Thumbs.db
 
 # Ignore backups
 *backup*
+
+# Superpowers brainstorm sessions
+.superpowers/
