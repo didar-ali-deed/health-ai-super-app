@@ -81,6 +81,7 @@ html, body {
 .nav-item {
   color: var(--text-mid);
   text-decoration: none;
+  cursor: default;
   font-weight: 500;
   font-size: 0.95rem;
   padding: 0.4rem 0.85rem;
