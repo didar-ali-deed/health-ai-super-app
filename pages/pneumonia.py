@@ -20,7 +20,7 @@ if "redirect_to" not in st.session_state:
     st.session_state.redirect_to = "app.py"
 
 # Apply layout
-apply_custom_css()
+apply_custom_css(st.session_state.get('theme', 'light'))
 render_header()
 
 # Check authentication

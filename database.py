@@ -65,7 +65,7 @@ def init_db():
                 CREATE TABLE IF NOT EXISTS patients (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER NOT NULL,
-                    age INTEGER CHECK(age >= 1 AND age <= 13),
+                    age INTEGER CHECK(age >= 1 AND age <= 130),
                     bmi REAL CHECK(bmi >= 10 AND bmi <= 100),
                     high_bp INTEGER CHECK(high_bp IN (0, 1)),
                     high_chol INTEGER CHECK(high_chol IN (0, 1)),

@@ -1,8 +1,6 @@
 import os
 import logging
-import base64
 from datetime import datetime
-from io import BytesIO
 
 import streamlit as st
 import pyotp
@@ -30,7 +28,7 @@ SESSION_DEFAULTS: dict = {
     "username": "",
     "user_id": None,
     "redirect_to": "app.py",
-    "last_activity": datetime.now(),
+    "last_activity": None,  # Sentinel — set to datetime.now() per-session in init_session_state
     "theme": "light",
     "notifications": [],
     "2fa_secret": None,
@@ -42,6 +40,9 @@ def init_session_state() -> None:
     for key, value in SESSION_DEFAULTS.items():
         if key not in st.session_state:
             st.session_state[key] = value
+    # Always set a live timestamp — never use the None sentinel or a frozen import-time value
+    if st.session_state.last_activity is None:
+        st.session_state.last_activity = datetime.now()
 
 
 def push_notification(kind: str, message: str) -> None:

@@ -3,10 +3,10 @@ import os
 import base64
 
 def apply_custom_css(theme="light"):
+    """Applies custom CSS from `style.css` and handles light/dark mode."""
     st.markdown("""
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
             """, unsafe_allow_html=True)
-    """Applies custom CSS from `style.css` and handles light/dark mode."""
     css_path = "style.css"
     try:
         if os.path.exists(css_path):
@@ -132,7 +132,7 @@ def render_footer():
     links_html = "".join([f"<a href='{l['href']}' class='footer-link'>{l['name']}</a>" for l in footer_links])
     socials_html = "".join([f"<a href='{s['href']}' class='social-link'>{s['icon']}</a>" for s in social_links])
     contact_html = "".join([
-        f"<p>{c['icon']} {f'<a href={c['href']} class=footer-link>{c['text']}</a>' if 'href' in c else c['text']}</p>" 
+        "<p>" + c['icon'] + " " + (f"<a href='{c['href']}' class='footer-link'>{c['text']}</a>" if 'href' in c else c['text']) + "</p>"
         for c in contact_info
     ])
 
