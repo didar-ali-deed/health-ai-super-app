@@ -13,6 +13,12 @@ def apply_custom_css(theme="light"):
             with open(css_path) as f:
                 css = f.read()
             st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+            # Inject data-theme onto <body> so [data-theme="dark"] CSS selectors activate
+            theme_attr = theme if theme in ("light", "dark") else "light"
+            st.markdown(
+                f"<script>document.body.setAttribute('data-theme', '{theme_attr}');</script>",
+                unsafe_allow_html=True,
+            )
         else:
             st.warning("Custom CSS file not found.")
     except Exception as e:
@@ -30,37 +36,41 @@ def render_header():
     else:
         logo_src = fallback_logo
 
+    # href is intentionally absent — Streamlit does not handle anchor navigation.
+    # Navigation is done via st.switch_page() in render_services() and the sidebar.
     nav_items = [
-        {"name": "Home", "href": "/", "active": st.session_state.get("redirect_to", "") == "app.py"},
+        {"name": "Home", "active": st.session_state.get("redirect_to", "") == "app.py"},
         {
             "name": "Services",
             "dropdown": [
-                {"name": "Diabetes Detection", "href": "/diabetes"},
-                {"name": "Parkinson's Detection", "href": "/parkinsons"},
-                {"name": "Pneumonia Detection", "href": "/pneumonia"}
-            ]
+                {"name": "Diabetes Detection"},
+                {"name": "Parkinson's Detection"},
+                {"name": "Pneumonia Detection"},
+            ],
         },
-        {"name": "About", "href": "/about", "active": st.session_state.get("redirect_to", "").endswith("about.py")},
-        {"name": "Contact", "href": "/contact", "active": st.session_state.get("redirect_to", "").endswith("contact.py")},
-        {"name": "Privacy", "href": "/privacy", "active": st.session_state.get("redirect_to", "").endswith("privacy.py")},
-        {"name": "Log in / Sign up", "href": "/login", "class": "cta-button", "active": st.session_state.get("redirect_to", "").endswith("login.py")}
+        {"name": "About", "active": st.session_state.get("redirect_to", "").endswith("about.py")},
+        {"name": "Contact", "active": st.session_state.get("redirect_to", "").endswith("contact.py")},
+        {"name": "Privacy", "active": st.session_state.get("redirect_to", "").endswith("privacy.py")},
+        {"name": "Log in / Sign up", "class": "cta-nav-btn", "active": False},
     ]
 
-    # Build nav HTML
     nav_html = "<nav class='nav-menu' role='navigation'>"
     for item in nav_items:
         if "dropdown" in item:
+            dropdown_links = "".join(
+                f"<span class='dropdown-item'>{sub['name']}</span>"
+                for sub in item["dropdown"]
+            )
             nav_html += f"""
             <div class='dropdown'>
-                <a href='#' class='nav-item' aria-haspopup='true'>{item['name']}</a>
-                <div class='dropdown-content'>
-                    {''.join([f"<a href='{sub['href']}' class='dropdown-item'>{sub['name']}</a>" for sub in item['dropdown']])}
-                </div>
+                <span class='nav-item' aria-haspopup='true'>{item['name']}</span>
+                <div class='dropdown-content'>{dropdown_links}</div>
             </div>
             """
         else:
             active_class = "active" if item.get("active", False) else ""
-            nav_html += f"<a href='{item['href']}' class='nav-item {item.get('class', '')} {active_class}'>{item['name']}</a>"
+            extra_class = item.get("class", "")
+            nav_html += f"<span class='nav-item {extra_class} {active_class}'>{item['name']}</span>"
     nav_html += "</nav>"
 
     # JavaScript for mobile nav and dropdown handling
@@ -137,3 +147,60 @@ def render_footer():
     </footer>
     """, unsafe_allow_html=True)
 
+
+def render_services() -> None:
+    """Render the three service cards with working Streamlit navigation."""
+    SERVICES = [
+        {
+            "name": "Diabetes Detection",
+            "icon": "🩺",
+            "model": "XGBoost",
+            "accuracy": "88%",
+            "desc": "Assess diabetes risk with a high-precision XGBoost model trained on 21 clinical features.",
+            "link": "pages/diabetes.py",
+        },
+        {
+            "name": "Parkinson's Disease",
+            "icon": "🎙️",
+            "model": "Keras DNN",
+            "accuracy": "91%",
+            "desc": "Detect early Parkinson's signs through voice pattern analysis with a deep neural network.",
+            "link": "pages/parkinsons.py",
+        },
+        {
+            "name": "Pneumonia Detection",
+            "icon": "🩻",
+            "model": "TensorFlow CNN",
+            "accuracy": "92%",
+            "desc": "Identify pneumonia from chest X-ray images using a convolutional neural network.",
+            "link": "pages/pneumonia.py",
+        },
+    ]
+
+    st.markdown(
+        "<h2 class='section-title' style='text-align:center;margin-bottom:2rem'>"
+        "Our AI-Powered Health Solutions</h2>",
+        unsafe_allow_html=True,
+    )
+
+    cols = st.columns(3)
+    for col, svc in zip(cols, SERVICES):
+        with col:
+            st.markdown(
+                f"""
+                <div class="service-card">
+                    <div class="service-icon">{svc['icon']}</div>
+                    <h3>{svc['name']}</h3>
+                    <p class="service-meta">{svc['model']} · {svc['accuracy']} accuracy</p>
+                    <p>{svc['desc']}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if st.session_state.get("logged_in"):
+                if st.button(f"Analyse →", key=f"svc_{svc['link']}", use_container_width=True):
+                    st.switch_page(svc["link"])
+            else:
+                if st.button("Log in to Access", key=f"svc_login_{svc['link']}", use_container_width=True):
+                    st.session_state.redirect_to = svc["link"]
+                    st.switch_page("pages/login.py")
