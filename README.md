@@ -1,3 +1,14 @@
+---
+title: Health AI Super App
+emoji: 🏥
+colorFrom: blue
+colorTo: indigo
+sdk: streamlit
+sdk_version: 1.45.1
+app_file: app.py
+pinned: false
+---
+
 # 🧠 Health AI Super App
 
 An end-to-end **AI-powered health diagnostics system** built with Python and Streamlit. It enables real-time prediction of **Diabetes**, **Parkinson’s Disease**, and **Pneumonia** using a combination of **XGBoost**, **Convolutional Neural Networks (CNN)**, and **Deep Neural Networks (DNN)**. Developed and deployed by a Machine Learning Engineer as a full-stack ML project.
