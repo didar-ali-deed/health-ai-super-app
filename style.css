@@ -19,6 +19,11 @@
   --border-card:    #e0ecff;
   --shadow-card:    0 2px 8px rgba(0, 82, 204, 0.06);
   --shadow-hover:   0 6px 20px rgba(0, 82, 204, 0.14);
+  --shadow-header:  0 1px 4px rgba(0, 82, 204, 0.05);
+  --shadow-cta:     0 4px 14px rgba(0, 82, 204, 0.3);
+  --shadow-cta-hover: 0 6px 18px rgba(0, 82, 204, 0.4);
+  --shadow-focus:   0 0 0 3px rgba(0, 82, 204, 0.12);
+  --badge-bg:       rgba(0, 82, 204, 0.1);
   --radius-card:    8px;
   --radius-pill:    20px;
   --font:           'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -38,6 +43,11 @@
   --border-card:   #1e3a5f;
   --shadow-card:   0 2px 8px rgba(0, 0, 0, 0.4);
   --shadow-hover:  0 6px 20px rgba(0, 0, 0, 0.5);
+  --shadow-header: 0 1px 4px rgba(0, 0, 0, 0.3);
+  --shadow-cta:    0 4px 14px rgba(59, 130, 246, 0.3);
+  --shadow-cta-hover: 0 6px 18px rgba(59, 130, 246, 0.4);
+  --shadow-focus:  0 0 0 3px rgba(59, 130, 246, 0.2);
+  --badge-bg:      rgba(59, 130, 246, 0.15);
 }
 
 /* Base */
@@ -61,7 +71,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0, 82, 204, 0.05);
+  box-shadow: var(--shadow-header);
 }
 
 .logo-container {
@@ -164,7 +174,7 @@ html, body {
 
 .hero-badge {
   display: inline-block;
-  background: rgba(0, 82, 204, 0.1);
+  background: var(--badge-bg);
   color: var(--primary);
   font-size: 0.7rem;
   font-weight: 700;
@@ -220,14 +230,14 @@ html, body {
   text-decoration: none;
   font-weight: 600;
   font-size: 0.95rem;
-  box-shadow: 0 4px 14px rgba(0, 82, 204, 0.3);
+  box-shadow: var(--shadow-cta);
   transition: var(--transition);
 }
 
 .cta-button:hover, .cta-button:focus {
   background: var(--primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0, 82, 204, 0.4);
+  box-shadow: var(--shadow-cta-hover);
 }
 
 /* ── Section title ────────────────────────────────────────── */
@@ -315,7 +325,7 @@ html, body {
 .form-input:focus {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.12);
+  box-shadow: var(--shadow-focus);
 }
 
 .submit-button {
