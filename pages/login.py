@@ -70,7 +70,11 @@ if "logged_in" not in st.session_state:
     st.session_state.user_id = None
     st.session_state.last_activity = datetime.now()
     st.session_state.redirect_to = "app.py"
+# Always initialize rate-limit keys independently — they may be missing
+# if the user navigated here from app.py (where init_session_state() ran)
+if "login_attempts" not in st.session_state:
     st.session_state.login_attempts = 0
+if "last_attempt_time" not in st.session_state:
     st.session_state.last_attempt_time = None
 
 # Session timeout (30 minutes)
