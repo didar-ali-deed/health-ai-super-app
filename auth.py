@@ -61,18 +61,22 @@ def display_notifications() -> None:
 
 
 def render_login_form() -> None:
-    st.warning("Log in or sign up to access advanced health solutions.")
+    st.info("Log in or sign up to access the AI health diagnostics.")
     with st.form("quick_login", clear_on_submit=True):
         username = st.text_input("Username", placeholder="Enter username", key="quick_username")
         password = st.text_input("Password", type="password", placeholder="Enter password", key="quick_password")
         tfa_code = None
         if st.session_state.get("2fa_enabled", False):
             tfa_code = st.text_input("2FA Code", placeholder="Enter 6-digit code", key="2fa_code_login")
-        col, _ = st.columns([1, 3])
-        with col:
-            submitted = st.form_submit_button("Login", use_container_width=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            submitted = st.form_submit_button("Log In", use_container_width=True, type="primary")
+        with col2:
+            go_signup = st.form_submit_button("Sign Up", use_container_width=True)
         if submitted:
             _handle_login(username, password, tfa_code)
+        if go_signup:
+            st.switch_page("pages/login.py")
 
 
 def _handle_login(username: str, password: str, tfa_code: str | None) -> None:
