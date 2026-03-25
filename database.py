@@ -1,3 +1,20 @@
+
+def _run_migrations():
+    """Add new columns to existing tables safely using PRAGMA checks."""
+    try:
+        with db_pool.get_connection() as conn:
+            c = conn.cursor()
+            cols = {row[1] for row in c.execute('PRAGMA table_info(users)')}
+            if 'tfa_secret' not in cols:
+                c.execute('ALTER TABLE users ADD COLUMN tfa_secret TEXT DEFAULT NULL')
+            if 'tfa_enabled' not in cols:
+                c.execute('ALTER TABLE users ADD COLUMN tfa_enabled INTEGER DEFAULT 0')
+            conn.commit()
+            logging.info('Migrations applied successfully')
+    except Exception as e:
+        logging.error(f'Migration error: {str(e)}')
+        raise
+
 import sqlite3
 import pandas as pd
 from datetime import datetime, timedelta
@@ -22,6 +39,9 @@ DB_PATH = "health_data.db"
 BACKUP_PATH = "health_data_backup.db"
 ph = PasswordHasher()
 last_backup_time = None
+
+# Canonical email regex — single source of truth, reused by all callers
+EMAIL_REGEX = re.compile(r'^[\w\.-]+@[\w\.-]+\.\w+$')
 
 # Connection pooling for thread-safe database access
 class DatabaseConnection:
@@ -126,6 +146,17 @@ def init_db():
                     FOREIGN KEY (user_id) REFERENCES users(id)
                 )
             ''')
+            # Create contact_submissions table
+            c.execute('''
+                CREATE TABLE IF NOT EXISTS contact_submissions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    email TEXT NOT NULL,
+                    subject TEXT,
+                    message TEXT NOT NULL,
+                    submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
             # Create indexes
             c.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON patients(timestamp)')
             c.execute('CREATE INDEX IF NOT EXISTS idx_user_id ON patients(user_id)')
@@ -133,6 +164,7 @@ def init_db():
             c.execute('CREATE INDEX IF NOT EXISTS idx_predictions_user_id ON predictions(user_id)')
             c.execute('CREATE INDEX IF NOT EXISTS idx_predictions_timestamp ON predictions(timestamp)')
             conn.commit()
+            _run_migrations()
             backup_database(force=True)
             logging.info("Database initialized successfully")
     except Exception as e:
@@ -337,4 +369,52 @@ def delete_user(user_id):
             logging.info(f"User {user_id} and related data deleted successfully")
     except Exception as e:
         logging.error(f"Error deleting user {user_id}: {str(e)}\n{traceback.format_exc()}")
+        raise
+def save_2fa_secret(user_id, secret):
+    try:
+        with db_pool.get_connection() as conn:
+            c = conn.cursor()
+            c.execute('UPDATE users SET tfa_secret = ? WHERE id = ?', (secret, user_id))
+            conn.commit()
+            logging.info(f'2FA secret saved for user_id {user_id}')
+    except Exception as e:
+        logging.error(f'Error saving 2FA secret: {str(e)}')
+        raise
+
+
+def enable_2fa(user_id):
+    try:
+        with db_pool.get_connection() as conn:
+            c = conn.cursor()
+            c.execute('UPDATE users SET tfa_enabled = 1 WHERE id = ?', (user_id,))
+            conn.commit()
+            logging.info(f'2FA enabled for user_id {user_id}')
+    except Exception as e:
+        logging.error(f'Error enabling 2FA: {str(e)}')
+        raise
+
+
+def get_2fa_info(user_id):
+    try:
+        with db_pool.get_connection() as conn:
+            c = conn.cursor()
+            c.execute('SELECT tfa_enabled, tfa_secret FROM users WHERE id = ?', (user_id,))
+            row = c.fetchone()
+            if row:
+                return row[0], row[1]
+            return 0, None
+    except Exception as e:
+        logging.error(f'Error getting 2FA info: {str(e)}')
+        raise
+
+
+def disable_2fa(user_id):
+    try:
+        with db_pool.get_connection() as conn:
+            c = conn.cursor()
+            c.execute('UPDATE users SET tfa_enabled = 0, tfa_secret = NULL WHERE id = ?', (user_id,))
+            conn.commit()
+            logging.info(f'2FA disabled for user_id {user_id}')
+    except Exception as e:
+        logging.error(f'Error disabling 2FA: {str(e)}')
         raise

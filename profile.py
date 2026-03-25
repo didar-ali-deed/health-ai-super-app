@@ -7,7 +7,7 @@ import qrcode
 import streamlit as st
 
 from auth import handle_logout, push_notification
-from database import delete_user, update_user_theme
+from database import delete_user, update_user_theme, save_2fa_secret, enable_2fa, disable_2fa
 
 
 def render_profile() -> None:
@@ -38,6 +38,16 @@ def _render_2fa_section() -> None:
     st.subheader("Two-Factor Authentication")
     if st.session_state.get("2fa_enabled", False):
         st.success("2FA is enabled on your account.")
+        if st.button("Disable 2FA", key="disable_2fa"):
+            try:
+                disable_2fa(st.session_state.user_id)
+                st.session_state["2fa_enabled"] = False
+                st.session_state["2fa_secret"] = None
+                push_notification("success", "2FA disabled.")
+                logging.info("2FA disabled for user_id %s", st.session_state.user_id)
+            except Exception as exc:
+                st.error(f"Error disabling 2FA: {exc}")
+            st.rerun()
         return
 
     if st.button("Set Up 2FA", key="setup_2fa"):
@@ -66,6 +76,8 @@ def _render_2fa_section() -> None:
         if st.button("Activate 2FA", key="activate_2fa"):
             totp = pyotp.TOTP(st.session_state["2fa_secret"])
             if totp.verify(code):
+                save_2fa_secret(st.session_state.user_id, st.session_state["2fa_secret"])
+                enable_2fa(st.session_state.user_id)
                 st.session_state["2fa_enabled"] = True
                 push_notification("success", "2FA enabled successfully!")
                 logging.info("2FA enabled for user_id %s", st.session_state.user_id)

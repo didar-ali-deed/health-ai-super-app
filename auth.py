@@ -6,7 +6,7 @@ import streamlit as st
 import pyotp
 from cryptography.fernet import Fernet
 
-from database import authenticate_user
+from database import authenticate_user, get_2fa_info
 
 # Generated once when Python imports this module — stable for the lifetime
 # of the process. Intentionally NOT stable across process restarts (e.g.
@@ -65,9 +65,7 @@ def render_login_form() -> None:
     with st.form("quick_login", clear_on_submit=True):
         username = st.text_input("Username", placeholder="Enter username", key="quick_username")
         password = st.text_input("Password", type="password", placeholder="Enter password", key="quick_password")
-        tfa_code = None
-        if st.session_state.get("2fa_enabled", False):
-            tfa_code = st.text_input("2FA Code", placeholder="Enter 6-digit code", key="2fa_code_login")
+        tfa_code = st.text_input("2FA Code (if enabled)", placeholder="Enter 6-digit code or leave blank", key="2fa_code_login")
         col1, col2 = st.columns(2)
         with col1:
             submitted = st.form_submit_button("Log In", use_container_width=True, type="primary")
@@ -86,12 +84,17 @@ def _handle_login(username: str, password: str, tfa_code: str | None) -> None:
             st.error("Invalid username or password.")
             logging.warning("Failed login for %s", username)
             return
-        if st.session_state.get("2fa_enabled") and tfa_code:
-            totp = pyotp.TOTP(st.session_state["2fa_secret"])
-            if not totp.verify(tfa_code):
+        tfa_enabled, tfa_secret = get_2fa_info(user[0])
+        if tfa_enabled:
+            if not tfa_code:
+                st.error("2FA code required.")
+                return
+            if not pyotp.TOTP(tfa_secret).verify(tfa_code):
                 st.error("Invalid 2FA code.")
                 logging.warning("Invalid 2FA for %s", username)
                 return
+        st.session_state["2fa_enabled"] = bool(tfa_enabled)
+        st.session_state["2fa_secret"] = tfa_secret
         st.session_state.logged_in = True
         st.session_state.username = username
         st.session_state.user_id = user[0]
