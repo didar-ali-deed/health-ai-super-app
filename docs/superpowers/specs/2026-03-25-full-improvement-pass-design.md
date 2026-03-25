@@ -1,7 +1,7 @@
 # Health AI Super App — Full Improvement Pass Design
 
 **Date:** 2026-03-25
-**Status:** Draft
+**Status:** Draft (revision 2 — all reviewer issues addressed)
 **Scope:** Fix critical bugs, DRY refactor, complete dark mode, style consolidation, HF Spaces deployment
 
 ---
@@ -210,3 +210,30 @@ Remaining steps documented in CLAUDE.md:
 7. `pages/about.py`, `contact.py`, `privacy.py` — DRY refactor; fix breadcrumbs; remove sidebar; use CSS classes
 8. `pages/diabetes.py`, `parkinsons.py`, `pneumonia.py` — fix CTA; add last_activity update
 9. `tests/` — add new tests for utils.py and database.py 2FA functions
+
+
+---
+
+## Spec Revision Notes (addressing reviewer issues)
+
+**utils.py import constraint**: Imports ONLY database.py + stdlib. Never auth.py (circular import risk).
+
+**auth.py 2FA fix**: REPLACE (delete) lines 84-89 entirely. New code uses get_2fa_info(user[0]) from DB. Old session-state guard must be removed, not supplemented.
+
+**render_login_form 2FA field**: Always render the field (remove session-state gate). Non-2FA users leave blank; server validates only when DB tfa_enabled=1.
+
+**DB migration guards**: Use PRAGMA table_info() to check before ALTER TABLE on startup. Safe to run every time.
+
+**contact_submissions**: No conflict — both CREATE TABLE IF NOT EXISTS calls are idempotent. Remove from contact.py in step 7.
+
+**cleanup_expired_tokens**: Called in app.py AFTER init_db(), in its own try/except — never inside init_db(). Failure is non-fatal.
+
+**toggle_theme DRY**: Explicitly remove local toggle_theme() from about.py, contact.py, privacy.py and call utils.toggle_theme() instead.
+
+**login.py time.sleep(1)**: Leave intentionally — brute-force resistance. Only remove st.info(token).
+
+**Breadcrumbs**: Use st.page_link() (Streamlit 1.45.1 supported) not st.button(). Renders as inline anchor.
+
+**app.py timeout**: app.py IS changed — replace inline timeout block with check_session_timeout().
+
+**Footer fix rationale**: --footer-bg intentionally absent from dark-mode override block so it stays dark in both themes.
