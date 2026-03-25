@@ -6,7 +6,6 @@ from io import BytesIO
 
 import streamlit as st
 import pyotp
-import qrcode
 from cryptography.fernet import Fernet
 
 from database import authenticate_user
@@ -75,7 +74,7 @@ def render_login_form() -> None:
             _handle_login(username, password, tfa_code)
 
 
-def _handle_login(username: str, password: str, tfa_code) -> None:
+def _handle_login(username: str, password: str, tfa_code: str | None) -> None:
     try:
         user = authenticate_user(username, password)
         if not user:
