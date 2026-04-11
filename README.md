@@ -1,8 +1,5 @@
 ---
 title: Health AI Super App
-emoji: 🏥
-colorFrom: blue
-colorTo: indigo
 sdk: streamlit
 sdk_version: 1.45.1
 app_file: app.py
@@ -133,11 +130,11 @@ You can deploy it yourself via:
 ## 🧑‍💻 Author
 
 **Didar Ali**  
-_Machine Learning Engineer | Python Developer_
+Machine Learning Engineer | Python Developer
 
 - 🌐 GitHub: [https://github.com/didar-ali-deed](https://github.com/didar-ali-deed)
 - 💼 LinkedIn: [https://linkedin.com/in/didar-ali-deed](https://linkedin.com/in/didar-ali-deed)
-- 📫 Contact: youremail@example.com
+- 📫 [didarali1129@gmail.com]
 
 ---
 

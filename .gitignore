@@ -4,6 +4,7 @@ __pycache__/
 
 # Ignore environment
 myenv/
+venv/
 .env
 
 # Ignore data/models unless you need them deployed
@@ -19,5 +20,3 @@ Thumbs.db
 # Ignore backups
 *backup*
 
-# Superpowers brainstorm sessions
-.superpowers/
